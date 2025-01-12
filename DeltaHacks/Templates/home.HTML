@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spoken - Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            background-color: #40e0d0;
+            padding: 10px 0;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #555;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: #777;
+        }
+        .content {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 40px;
+            color: black;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .slogan {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #555;
+        }
+        .slogan b {
+            color: black;
+        }
+        .rect-box {
+            width: 80%;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #e6e6e6;
+            text-align: left;
+        }
+        .close-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: red;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .close-btn:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('transcription') }}">Transcription</a>
+            <a href="{{ url_for('translation') }}">Translation</a>
+            <a href="{{ url_for('sentiment') }}">Sentiment</a>
+            <a href="{{ url_for('simplification') }}">Simplification</a>
+        </nav>
+    </header>
+    <div class="content">
+        <div class="logo">Spoken</div>
+        <p class="slogan">Breaking Barriers with Every Word <b>Spoken</b></p>
+        
+        <div class="rect-box">Transcription: Used to transcribe spoken text into written format.</div>
+        <div class="rect-box">Translation: Converts spoken language into English translations.</div>
+        <div class="rect-box">Sentiment: Analyzes the tone and emotion of your speech.</div>
+        <div class="rect-box">Simplification: Simplifies complex speech into easier language.</div>
+
+        <button class="close-btn" onclick="window.close()">Close</button>
+    </div>
+</body>
+</html>

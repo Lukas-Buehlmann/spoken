@@ -1,13 +1,9 @@
-from queue import Queue
-
-import os
-import numpy as np
-from openai import OpenAI
-import speech_recognition as sr
+from stt import SpeechToText
 
 
 def main():
-    pass
+    speech = SpeechToText()
+    speech.transcribe()
 
 
 if __name__ == "__main__":

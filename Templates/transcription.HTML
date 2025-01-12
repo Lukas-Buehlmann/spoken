@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spoken - Transcription</title>
+    <title>Spoken - Transcribe</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,14 +81,14 @@
     <header>
         <nav>
             <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('transcription') }}">Transcription</a>
-            <a href="{{ url_for('translation') }}">Translation</a>
-            <a href="{{ url_for('sentiment') }}">Sentiment</a>
-            <a href="{{ url_for('simplification') }}">Simplification</a>
+            <a href="{{ url_for('transcription') }}">Transcribe</a>
+            <a href="{{ url_for('translation') }}">Translate</a>
+            <a href="{{ url_for('sentiment') }}">Tone</a>
+            <a href="{{ url_for('simplification') }}">Simplify</a>
         </nav>
     </header>
     <div class="content">
-        <h1>Transcription</h1>
+        <h1>Transcribe</h1>
         <div class="logo">Spoken</div>
         <p class="slogan">Breaking Barriers with Every Word <b>Spoken</b></p>
 
@@ -98,7 +98,34 @@
             <script src="../static/fetchJSON.js"></script>
         </div>
 
-        <button>Speak</button>
+        <button type="button" onclick="record()">Speak</button>
     </div>
+    <script>
+        async function record() {const textbox = document.getElementById('jsonTextOutput');
+        textbox.textContent = "Listening...";
+
+        try {
+            const response = await fetch('/start-mic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task: 'transcribe', mode: 'normal' }) // Send task and mode
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Display the content
+        textbox.textContent = data.text.original;
+        } catch (error) {
+            console.error('An error occurred:', error);
+            textbox.textContent = 'An error occurred. Please try again.';
+        }
+    }
+
+    </script>
+<!--        <script src="../static/writeJSON.js"></script>-->
 </body>
 </html>

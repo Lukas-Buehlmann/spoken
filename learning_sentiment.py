@@ -63,16 +63,4 @@ def get_emotion(text):
         # Append result
         results.append((most_confident_sentiment, most_confident_emoji))
 
-    #Thread cleanup since torch and transformers can be messy
-    for thread in threading.enumerate():
-        if not thread.daemon and thread is not threading.main_thread():
-            thread.join()
-
-    del sentiment_tokenizer
-    del sentiment_model
-    del emotion_tokenizer
-    del emotion_model
-    gc.collect()
-
     return results
-

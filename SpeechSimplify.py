@@ -28,7 +28,7 @@ class SimplifyText(SpeechToText):
         except Exception as error:
             simplified_text = f"Error: {str(error)}"
 
-        self.transcription.append(simplified_text)
+        self.transcription[1] = simplified_text
 
         print(f'original: {original_text}\n\nsimplified: {simplified_text}')
         

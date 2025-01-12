@@ -29,5 +29,5 @@ async function displayJSON(filePath) {
     }
 }
 
-
+// Display the current state from the JSON file
 displayJSON('../static/current_state.json');

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spoken - Sentiment</title>
+    <title>Tone</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
             margin: 0;
             padding: 0;
             display: flex;
@@ -36,42 +35,21 @@
             background-color: #777;
         }
         .content {
-            margin-top: 50px;
+            margin-top: 30px;
             text-align: center;
         }
-        h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-        }
-        .logo {
-            font-size: 30px;
-            color: black;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        .slogan {
-            font-size: 18px;
-            margin-top: 10px;
-            color: #555;
-        }
-        .slogan b {
-            color: black;
-        }
-        .rect-box {
+        textarea {
             width: 80%;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #e6e6e6;
-            text-align: left;
-        }
-        .small-box {
-            width: 60%;
+            height: 100px;
             margin-top: 10px;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #e6e6e6;
-            text-align: left;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 50px; /* Make emoji larger */
         }
         button {
             margin-top: 20px;
@@ -89,33 +67,90 @@
     <header>
         <nav>
             <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('transcription') }}">Transcription</a>
-            <a href="{{ url_for('translation') }}">Translation</a>
-            <a href="{{ url_for('sentiment') }}">Sentiment</a>
-            <a href="{{ url_for('simplification') }}">Simplification</a>
+            <a href="{{ url_for('transcription') }}">Transcribe</a>
+            <a href="{{ url_for('translation') }}">Translate</a>
+            <a href="{{ url_for('sentiment') }}">Tone</a>
+            <a href="{{ url_for('simplification') }}">Simplify</a>
         </nav>
     </header>
     <div class="content">
-        <h1>Sentiment</h1>
-        <div class="logo">Spoken</div>
-        <p class="slogan">Breaking Barriers with Every Word <b>Spoken</b></p>
-
-        <h2>Speech:</h2>
-        <div class="rect-box">
-            <p>Your speech will appear here.</p>
-        </div>
-
-        <h2>Tone:</h2>
-        <div class="small-box">
-            <p>Your tone analysis will appear here.</p>
-        </div>
-
-        <h2>Emotion:</h2>
-        <div class="small-box">
-            <p>Your emotion analysis will appear here.</p>
-        </div>
-
-        <button>Speak</button>
+        <h1>Tone</h1>
+        <textarea id="jsonOutputSimple" placeholder="Enter text here..."></textarea>
+        <button style="display: inline-block" onclick="analyzeText()">Analyze</button>
+        <button type="button" onclick="record()">Speak</button>
+        <div id="result" class="result"></div>
     </div>
+
+
+    <script>
+        async function record() {
+        const textbox = document.getElementById('jsonOutputSimple');
+        textbox.textContent = "Listening...";
+
+        try {
+            const response = await fetch('/start-mic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task: 'translate', mode: 'normal' }) // Send task and mode
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Display the content
+        textbox.textContent = data.text.original;
+        } catch (error) {
+            console.error('An error occurred:', error);
+            textbox.textContent = 'An error occurred. Please try again.';
+        }
+        analyzeText()
+    }
+
+    </script>
+
+    <script>
+        async function analyzeText() {
+            const text = document.getElementById('jsonOutputSimple').value;
+            const resultDiv = document.getElementById('result');
+            const body = document.body; // Reference to the body to change background color
+            resultDiv.innerHTML = '<p>Analyzing...</p>';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+                resultDiv.innerHTML = '';
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                } else {
+                    data.forEach(item => {
+                        // Set background color based on sentiment
+                        if (item.sentiment === 'negative') {
+                            body.style.backgroundColor = '#FFECEC'; // Faint red
+                        } else if (item.sentiment === 'positive') {
+                            body.style.backgroundColor = '#ECFFEC'; // Faint green
+                        } else {
+                            body.style.backgroundColor = '#e6e6e6'; // Default grey
+                        }
+
+                        // Display the emotion emoji only
+                        const emoji = document.createElement('div');
+                        emoji.textContent = `${item.emoji}`;
+                        resultDiv.appendChild(emoji);
+                    });
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>An error occurred: ${error.message}</p>`;
+            }
+        }
+    </script>
 </body>
 </html>

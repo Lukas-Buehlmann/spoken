@@ -5,7 +5,7 @@ import gc
 import threading
 
 
-def get_emotion():
+def get_emotion(text):
 
     # List of Emotions and their corresponding emojis
     emotion_emoji_map = {
@@ -18,7 +18,7 @@ def get_emotion():
         "surprise": "\U0001F632"
     }
 
-    # Load the sentiment analysis model (Roberta)
+    # Load the sentiment analysis model (Roberta for overall positivity/negativity)
     sentiment_model_name = "cardiffnlp/twitter-roberta-base-sentiment"  # Remote or local path
     sentiment_tokenizer = AutoTokenizer.from_pretrained(sentiment_model_name)
     sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
@@ -30,11 +30,6 @@ def get_emotion():
 
     # Define emotion labels (specific to the emotion model)
     emotion_labels = ["anger", "disgust", "fear", "joy", "neutral", "sadness", "surprise"]
-
-    # Input text
-    text = ("I bought some welches fruit snacks, which I love because they're made with real fruit."
-            "After I bought them, I realized that they had expired, thank you to the store for selling terrible product."
-            "I still ate them, but they made me throw up.")
 
     # Split the text into sentences
     sentences = [sentence.strip() for sentence in text.split('.') if sentence.strip()]
@@ -68,6 +63,7 @@ def get_emotion():
         # Append result
         results.append((most_confident_sentiment, most_confident_emoji))
 
+    #Thread cleanup since torch and transformers can be messy
     for thread in threading.enumerate():
         if not thread.daemon and thread is not threading.main_thread():
             thread.join()
@@ -80,4 +76,3 @@ def get_emotion():
 
     return results
 
-print(get_emotion())

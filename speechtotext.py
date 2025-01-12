@@ -71,7 +71,11 @@ class SpeechToText:
         with sr.Microphone(sample_rate=16000) as source:
             print("listening...")
             self.r.pause_threshold = 4
-            audio_data = self.r.listen(source, stream=False, phrase_time_limit=30)
+            try:
+                audio_data = self.r.listen(source, stream=False, phrase_time_limit=30, timeout=5)
+            except sr.WaitTimeoutError:
+                print("No audio given in time. No transcription possible")
+                return
         data = audio_data.get_wav_data()
 
         with open("audio_data.wav", 'wb') as f:

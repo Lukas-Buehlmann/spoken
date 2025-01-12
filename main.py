@@ -14,6 +14,10 @@ simple = SimplifyText()
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
+    """
+    called from webapp to analyse text for sentiment and tone
+    :return: a JSON object containing sentiment and emojis
+    """
     text = request.json.get('text', '')  # Get the text input from the frontend
     if not text:
         return jsonify({'error': 'No text provided'}), 400

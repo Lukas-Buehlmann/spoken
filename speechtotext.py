@@ -96,6 +96,7 @@ class SpeechToText:
                 # store transcription and clean it up
                 text = result.text.strip()
                 self.transcription.append(text)
+                self.transcription.append('')
                 print(text)
 
         # clear the file contents and make the file if it doesn't exist

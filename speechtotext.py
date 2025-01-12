@@ -72,7 +72,7 @@ class SpeechToText:
             print("listening...")
             self.r.pause_threshold = 4
             try:
-                audio_data = self.r.listen(source, stream=False, phrase_time_limit=30, timeout=5)
+                audio_data = self.r.listen(source, stream=False, phrase_time_limit=10, timeout=3)
             except sr.WaitTimeoutError:
                 print("No audio given in time. No transcription possible")
                 return
@@ -83,14 +83,20 @@ class SpeechToText:
 
         with open("audio_data.wav", 'rb') as f:
             if self.model_task == 'translate':
+                result = self.model.audio.transcriptions.create(file=f, model="whisper-1")
+                text = result.text.strip()
+                print("original: " + text)
+                self.transcription.append(text)
                 result = self.model.audio.translations.create(file=f, model="whisper-1")
+                text = result.text.strip()
+                print("translation: " + text)
+                self.transcription.append(text)
             else:
                 result = self.model.audio.transcriptions.create(file=f, model="whisper-1")
-
-        # store transcription and clean it up
-        text = result.text.strip()
-        self.transcription.append(text)
-        print(text)
+                # store transcription and clean it up
+                text = result.text.strip()
+                self.transcription.append(text)
+                print(text)
 
         # clear the file contents and make the file if it doesn't exist
         # open("audio_data.wav", 'wb').close()

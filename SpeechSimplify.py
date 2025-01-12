@@ -1,5 +1,4 @@
 import openai
-import re
 from speechtotext import SpeechToText
 
 
@@ -15,7 +14,6 @@ class SimplifyText(SpeechToText):
         print(f'\n\n{original_text}\n\n')
         original_text.replace('\n', '. ')
         original_text.replace('\\\\', '')
-        # re.sub("(\\\\n)|(\\\\)", '', original_text)
         prompt = f"Simplify this text for non-native English speakers:\n\n'{original_text}'"
 
         try:
@@ -29,6 +27,8 @@ class SimplifyText(SpeechToText):
             simplified_text = response.choices[0].message.content
         except Exception as error:
             simplified_text = f"Error: {str(error)}"
+
+        self.transcription.append(simplified_text)
 
         print(f'original: {original_text}\n\nsimplified: {simplified_text}')
         

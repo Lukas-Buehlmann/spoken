@@ -4,6 +4,7 @@ from speechcleanup import CleanText
 from flask import Flask, render_template
 import json
 import time
+import threading
 
 
 app = Flask(__name__)
@@ -34,29 +35,40 @@ def simplification():
     return render_template('simplification.html')
 
 
-def main():
+def run_app():
     app.run(debug=False)
-    # speech = SimplifyText(model_task='transcribe')
-    # while True:
-    #     try:
-    #         with open("current_state.json", 'r') as f:
-    #             data = json.load(f)
-    #
-    #         if data["mic_on"]:
-    #             speech.transcribe()
-    #             match len(speech.transcription):
-    #                 case 1:
-    #                     data.text.original = speech.transcription[0]
-    #                 case 2:
-    #                     data.text.original = speech.transcription[0]
-    #                     data.text.simplified = speech.transcription[1]
-    #             data["mic_on"] = False
-    #
-    #             with open("current_state.json", 'w') as f:
-    #                 json.dump(data, f)
-    #         time.sleep(0.25)
-    #     except KeyboardInterrupt:
-    #         break
+
+
+def main():
+    flask_thread = threading.Thread(target=run_app)
+    flask_thread.daemon = True
+    flask_thread.start()
+
+    data = {"text": {"original": None, "simplified": None}, "mic_on": True}
+    with open("static/current_state.json", 'w') as f:
+        json.dump(data, f)
+    
+    speech = SpeechToText(model_task='translate')
+    while True:
+        try:
+            with open("static/current_state.json", 'r') as f:
+                data = json.load(f)
+
+            if data["mic_on"]:
+                speech.transcribe()
+                match len(speech.transcription):
+                    case 1:
+                        data["text"]["original"] = speech.transcription[0]
+                    case 2:
+                        data["text"]["original"] = speech.transcription[0]
+                        data["text"]["simplified"] = speech.transcription[1]
+                data["mic_on"] = False
+
+                with open("static/current_state.json", 'w') as f:
+                    json.dump(data, f)
+            time.sleep(0.25)
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == "__main__":

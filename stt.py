@@ -7,6 +7,10 @@ import speech_recognition as sr
 
 
 class SpeechToText:
+    """
+    A class for handling real-time speech-to-text and translation using
+    Whisper-1 from OpenAI.
+    """
 
     # time in seconds before recording callback is run again
     record_time_limit = 2
@@ -15,7 +19,12 @@ class SpeechToText:
     time_to_talk = 3
 
     def __init__(self, model_task='transcribe'):
+        """
+
+        :param model_task: set to 'translate' to turn on translation mode
+        """
         self.data = Queue()
+        self.model_task = model_task
 
         # create the audio recorder object
         # used for detecting speech only when audio is detected
@@ -74,7 +83,10 @@ class SpeechToText:
                         f.write(audio_data)
 
                     with open("audio_data.wav", 'rb') as f:
-                        result = self.model.audio.transcriptions.create(file=f, model="whisper-1")
+                        if self.model_task == 'translate':
+                            result = self.model.audio.translations.create(file=f, model="whisper-1")
+                        else:
+                            result = self.model.audio.transcriptions.create(file=f, model="whisper-1")
 
                     # store transcription and clean it up
                     text = result.text.strip()
@@ -91,6 +103,4 @@ class SpeechToText:
                 else:
                     time.sleep(0.1)
             except KeyboardInterrupt:
-                for line in self.transcription:
-                    print(line)
-                return self.transcription
+                break

@@ -4,6 +4,7 @@ import time
 from queue import Queue
 from openai import OpenAI
 import speech_recognition as sr
+from pydub import AudioSegment
 
 
 class SpeechToText:
@@ -13,10 +14,10 @@ class SpeechToText:
     """
 
     # time in seconds before recording callback is run again
-    record_time_limit = 2
+    record_time_limit = 1
 
     # time in seconds between recording before a newline is added
-    time_to_talk = 3
+    time_to_talk = 2
 
     def __init__(self, model_task='transcribe'):
         """
@@ -49,7 +50,7 @@ class SpeechToText:
 
     def r_callback(self, _, audio_data):
         """
-        Function to be called by speechrecognizer that will add wav data to the queue
+        Function to be called by 'speechrecognizer' that will add wav data to the queue
         in a separate thread
         :param _:
         :param audio_data: stores a speech_recognition.AudioData instance
@@ -59,11 +60,18 @@ class SpeechToText:
         self.data.put(wav_data)
 
     def transcribe(self):
+        """
+        method to transcribe or translate audio in real-time storing all information into 'self.transcription'
+        :return: None
+        """
         self.r.listen_in_background(self.source, self.r_callback, phrase_time_limit=SpeechToText.record_time_limit)
         time_talking = time.time()
         done_talking = False
         printed_index = 0
         self.transcription = ['']
+
+        # clear the file contents and make the file if it doesn't exist
+        open("audio_data.wav", 'wb').close()
 
         print("beginning transcription")
         while True:
@@ -79,8 +87,20 @@ class SpeechToText:
                     audio_data = b''.join(self.data.queue)
                     self.data.queue.clear()
 
-                    with open("audio_data.wav", 'wb') as f:
+                    with open("temp_audio.wav", 'wb') as f:
                         f.write(audio_data)
+
+                    wav_1 = AudioSegment.from_wav("temp_audio.wav")
+                    try:
+                        wav_2 = AudioSegment.from_wav("audio_data.wav")
+                        combined_wav = wav_1 + wav_2
+                        combined_wav.export("audio_data.wav", format="wav")
+                    except Exception:
+                        print("audio loading failed")
+                        wav_1.export("audio_data.wav", format="wav")
+
+                    # with open("audio_data.wav", 'wb') as f:
+                    #     f.write(audio_data)
 
                     with open("audio_data.wav", 'rb') as f:
                         if self.model_task == 'translate':
@@ -93,13 +113,18 @@ class SpeechToText:
 
                     if done_talking:
                         self.transcription.append(text)
+
+                        # empties the wav file contents
+                        open("audio_data.wav", 'wb').close()
+                        print(text)
                     else:
                         self.transcription[-1] = text
+                        # print(text)
 
-                    for i in range(len(self.transcription)):
-                        if i >= printed_index:
-                            print(self.transcription[i])
-                            printed_index += 1
+                    # for i in range(len(self.transcription)):
+                    #     if i >= printed_index:
+                    #         print(self.transcription[i])
+                    #         printed_index += 1
                 else:
                     time.sleep(0.1)
             except KeyboardInterrupt:

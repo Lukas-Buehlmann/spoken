@@ -1,8 +1,10 @@
-from stt import SpeechToText
+from speechtotext import SpeechToText
+from SpeechSimplify import SimplifyText
+from speechcleanup import CleanText
 
 
 def main():
-    speech = SpeechToText()
+    speech = SimplifyText(model_task='transcribe')
     speech.transcribe()
 
 
